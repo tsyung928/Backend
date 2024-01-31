@@ -1,2 +1,9 @@
-def get_teacher_by_name(client, name):
-    return client['fyp']['teacher'].find_one({'name': name})
+from flask import jsonify
+from pymongo import MongoClient
+
+def get_classes_by_teacher(client, username):
+    teacher = client['fyp']['teacher'].find_one({"username": username})
+    if teacher:
+        return jsonify(teacher['classes'])
+    else:
+        return jsonify([]), 404
