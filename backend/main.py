@@ -5,11 +5,11 @@ from flask_cors import CORS
 from pymongo import MongoClient
 
 
-from models.teacher import get_classes_by_teacher
+from models.teacher import get_classes_by_teacher, to_get_teacher_list
 from models.assignment import to_save_assignment, to_delete_assignment, to_update_assignment, \
     to_get_assignment_by_class, to_get_rubrics_by_assignment, \
     to_update_rubrics, to_create_assignment
-from models.student import get_students_by_class
+from models.student import get_students_by_class, to_get_all_students_list
 from models.ocr_google_vision import to_upload_and_process_pdf
 
 MONGODB_URI = "mongodb+srv://Chyanna:chyannapassword@cluster92493.zrgv9ji.mongodb.net/"
@@ -30,10 +30,18 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 def save_assignment():
     return to_save_assignment(client)
 
+@app.route('/teachers/', methods=['GET'])
+def get_teacher_list():
+    return to_get_teacher_list(client)
+
 @app.route('/teacher/<username>', methods=['GET'])
 def classes_by_teacher(username):
     return get_classes_by_teacher(client, username)
 
+
+@app.route('/students/', methods=['GET'])
+def get_all_students_list():
+    return to_get_all_students_list(client)
 
 @app.route('/students/<class_name>', methods=['GET'])
 def students_by_class(class_name):

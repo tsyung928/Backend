@@ -24,3 +24,8 @@ def get_students_by_class(client, class_name):
 
     # Return the list of student dictionaries as JSON
     return jsonify(students_list)
+
+def to_get_all_students_list(client):
+    students = list(
+        client['fyp']['student'].find({}, {'_id': 0, 'name': 1, 'class': 1, 'number': 1}))
+    return jsonify(students)
