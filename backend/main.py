@@ -1,10 +1,10 @@
 import os
 
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 
-
+from models.login import handle_login
 from models.teacher import get_classes_by_teacher, to_get_teacher_list
 from models.assignment import to_save_assignment, to_delete_assignment, to_update_assignment, \
     to_get_assignment_by_class, to_get_rubrics_by_assignment, \
@@ -25,6 +25,11 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 # reader = easyocr.Reader(['en'], gpu=False)
 
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    return handle_login(username, password, client)  # Pass the users collection
 
 @app.route('/assignments/', methods=['POST'])
 def save_assignment():
