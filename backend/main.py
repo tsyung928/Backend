@@ -5,19 +5,17 @@ from flask_cors import CORS
 from pymongo import MongoClient
 
 from models.login import handle_login
+from models.marking import mark_and_save_marking, get_grades_by_assignment, to_update_grade
 from models.teacher import get_classes_by_teacher, to_get_teacher_list
 from models.assignment import to_save_assignment, to_delete_assignment, to_update_assignment, \
     to_get_assignment_by_class, to_get_rubrics_by_assignment, \
-    to_update_rubrics, to_create_assignment
+    to_update_rubrics, to_create_assignment, to_get_description_by_assignment, to_get_class_by_assignment, \
+    to_get_title_by_assignment, to_get_homework_text_by_submissionId
 from models.student import get_students_by_class, to_get_all_students_list
 from models.ocr_google_vision import to_upload_and_process_pdf
 
-MONGODB_URI = "mongodb+srv://Chyanna:chyannapassword@cluster92493.zrgv9ji.mongodb.net/"
+MONGODB_URI = os.environ.get('MONGODB_URI')
 client = MongoClient(MONGODB_URI)
-
-bucket_name = 'fyp-bucket-tsy'
-os.environ[
-    'GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/chyanna/Desktop/FYP/MarkingApp/backend/venv/serious-bearing-412621-0ffe2185f86d.json'
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -75,15 +73,44 @@ def get_assignment_by_class(class_name):
     return to_get_assignment_by_class(client, class_name)
 
 
-@app.route('/assignment/assignment-title/<assignment_title>', methods=['GET'])
+@app.route('/assignment/fetch_rubrics_by_title/<assignment_title>', methods=['GET'])
 def get_rubrics_by_assignment(assignment_title):
     return to_get_rubrics_by_assignment(client, assignment_title)
+
+@app.route('/assignment/fetch_description_by_title/<assignment_title>', methods=['GET'])
+def get_description_by_assignment(assignment_title):
+    return to_get_description_by_assignment(client, assignment_title)
 
 
 @app.route('/assignment/update-rubrics', methods=['POST'])
 def update_rubrics():
     return to_update_rubrics(client)
 
+@app.route('/start-marking', methods=['POST'])
+def start_marking():
+    return mark_and_save_marking(client)
+
+@app.route('/marking/grades_after_mark/<assignmentId>', methods=['GET'])
+def grades_after_marking(assignmentId):
+    return get_grades_by_assignment(client, assignmentId)
+
+@app.route('/assignment/get_class_by_assignmentid/<assignmentId>', methods=['GET'])
+def get_class_by_assignment(assignmentId):
+    return to_get_class_by_assignment(client, assignmentId)
+
+@app.route('/assignment/get_title_by_assignmentid/<assignmentId>', methods=['GET'])
+def get_title_by_assignment(assignmentId):
+    return to_get_title_by_assignment(client, assignmentId)
+
+
+
+@app.route('/marking/update_grade/<submissionId>', methods=['PUT'])
+def update_grade(submissionId):
+    return to_update_grade(client,submissionId)
+
+@app.route('/assignment/get_homework_text_by_submissionId/<submissionId>', methods=['GET'])
+def get_homework_text_by_submissionId(submissionId):
+    return to_get_homework_text_by_submissionId(client, submissionId)
 
 @app.route('/ping', methods=['GET'])
 def ping():

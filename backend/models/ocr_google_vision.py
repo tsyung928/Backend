@@ -8,12 +8,15 @@ from google.cloud import storage
 from werkzeug.utils import secure_filename
 
 from models.assignment import save_text_to_db
+from dotenv import load_dotenv
+
+load_dotenv()
 
 storage_client = storage.Client()
 vision_client = vision.ImageAnnotatorClient()
-bucket_name = 'fyp-bucket-tsy'
-os.environ[
-    'GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/chyanna/Desktop/FYP/MarkingApp/backend/venv/serious-bearing-412621-0ffe2185f86d.json'
+
+bucket_name = os.environ.get('BUCKET_NAME')
+os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 
 
 def allowed_file(filename):
@@ -44,7 +47,7 @@ def to_upload_and_process_pdf(client):
         assignment_id = request.form.get('assignment_id')  # Get the assignment ID from the request
         save_text_to_db(client,student_id, assignment_id, text)
 
-        return jsonify({'message': 'File processed', 'text': text})
+        return jsonify({'message': 'File processed', 'text': text, 'status':'success'})
 
     return jsonify({'error': 'Error processing file'}), 400
 

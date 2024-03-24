@@ -20,7 +20,8 @@ def save_text_to_db(client, student_id, assignment_id, text):
     }
     query = {'studentId': student_id, 'assignmentId': assignment_id}
 
-    existing_entry = client['fyp']['submittedWork'].find_one({'studentId': student_id, 'assignmentId': assignment_id})
+    existing_entry = get_submitted_work_by_studentid_and_assignmentid(client, student_id, assignment_id)
+    #existing_entry=client['fyp']['submittedWork'].find_one({'studentId': student_id, 'assignmentId': assignment_id})
 
     if existing_entry:
         # If it exists, update the text
@@ -76,13 +77,18 @@ def to_update_assignment(client):
     data = request.get_json()
     result = client['fyp']['assignment'].update_one(
         {'class': data['class'], 'title': data['title']},
-        {'$set': {'rubrics': data['rubrics']}}
+        {
+            '$set': {
+                'rubrics': data['rubrics'],
+                'description': data['description']
+            }
+        }
     )
     assignmentId = client['fyp']['assignment'].find_one({'class':data['class'], 'title':data['title']})
     if result.modified_count:
         return jsonify({'success': True, 'id': str(assignmentId['_id'])}), 200
     else:
-        return jsonify({'success': False, 'message': 'No document found to update'}), 404
+        return jsonify({'success': False, 'id': str(assignmentId['_id'])}), 404
 
 def to_get_assignment_by_class(client, class_name):
     assignments = client['fyp']['assignment'].find({"class": class_name}, {"_id": 0, "title": 1})
@@ -102,6 +108,24 @@ def to_get_rubrics_by_assignment(client, assignment_title):
     else:
         return jsonify('No assignment found'), 404
 
+def to_get_description_by_assignment(client, assignment_title):
+    # Assuming each homework title is unique
+    assignment = client['fyp']['assignment'].find_one({"title": assignment_title})
+    if assignment:
+        return jsonify({
+            'description': assignment['description']
+        })
+    else:
+        return jsonify('No assignment found'), 404
+
+def to_get_title_by_id(client, assignment_id):
+    assignment = client['fyp']['assignment'].find_one({"_id": ObjectId(assignment_id)})
+    if assignment:
+        return jsonify({
+            'title': assignment['title']
+        })
+    else:
+        return jsonify('No assignment found'), 404
 def to_update_rubrics(client):
     data = request.get_json()
     class_name = data.get('class')
@@ -121,3 +145,36 @@ def to_update_rubrics(client):
     except Exception as e:
         print(f"An error occurred: {e}")
         return jsonify({'error': 'An error occurred while updating rubrics'}), 500
+
+def get_submitted_work_by_studentid_and_assignmentid(client, student_id, assignment_id):
+    work = client['fyp']['submittedWork'].find_one({'studentId': student_id, 'assignmentId': assignment_id})
+    return work
+
+def to_get_class_by_assignment(client, assignment_id):
+    assignment = client['fyp']['assignment'].find_one({"_id": ObjectId(assignment_id)})
+    if assignment:
+        return jsonify({
+            'class': assignment['class']
+        })
+    else:
+        return jsonify('No assignment found'), 404
+
+def to_get_title_by_assignment(client, assignment_id):
+    assignment = client['fyp']['assignment'].find_one({"_id": ObjectId(assignment_id)})
+    if assignment:
+        return jsonify({
+            'title': assignment['title']
+        })
+    else:
+        return jsonify('No assignment found'), 404
+
+def to_get_homework_text_by_submissionId(client, submission_id):
+    print(submission_id)
+    submission = client['fyp']['submittedWork'].find_one({"_id": ObjectId(submission_id)})
+    if submission:
+        print(submission['ocrText'])
+        return jsonify({
+            'homeworkText': submission['ocrText'],"status": "success"
+        })
+    else:
+        return jsonify('No submission found'), 404
