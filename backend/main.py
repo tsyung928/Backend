@@ -6,11 +6,12 @@ from pymongo import MongoClient
 
 from models.login import handle_login
 from models.marking import mark_and_save_marking, get_grades_by_assignment, to_update_grade
+from models.profile import to_update_password
 from models.teacher import get_classes_by_teacher, to_get_teacher_list
 from models.assignment import to_save_assignment, to_delete_assignment, to_update_assignment, \
     to_get_assignment_by_class, to_get_rubrics_by_assignment, \
     to_update_rubrics, to_create_assignment, to_get_description_by_assignment, to_get_class_by_assignment, \
-    to_get_title_by_assignment, to_get_homework_text_by_submissionId
+    to_get_title_by_assignment, to_get_homework_text_by_submissionId, to_get_type_by_assignment, to_get_types_by_teacher
 from models.student import get_students_by_class, to_get_all_students_list
 from models.ocr_google_vision import to_upload_and_process_pdf
 
@@ -72,6 +73,13 @@ def update_assignment():
 def get_assignment_by_class(class_name):
     return to_get_assignment_by_class(client, class_name)
 
+@app.route('/assignment/fetch_types/<username>', methods=['GET'])
+def get_types_by_teacher(username):
+    return to_get_types_by_teacher(client, username)
+
+@app.route('/assignment/fetch_type_by_title/<assignment_title>', methods=['GET'])
+def get_type_by_assignment(assignment_title):
+    return to_get_type_by_assignment(client, assignment_title)
 
 @app.route('/assignment/fetch_rubrics_by_title/<assignment_title>', methods=['GET'])
 def get_rubrics_by_assignment(assignment_title):
@@ -111,6 +119,10 @@ def update_grade(submissionId):
 @app.route('/assignment/get_homework_text_by_submissionId/<submissionId>', methods=['GET'])
 def get_homework_text_by_submissionId(submissionId):
     return to_get_homework_text_by_submissionId(client, submissionId)
+
+@app.route('/profile/update_password', methods=['PUT'])
+def update_password():
+    return to_update_password(client)
 
 @app.route('/ping', methods=['GET'])
 def ping():

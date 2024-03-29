@@ -118,6 +118,40 @@ def to_get_description_by_assignment(client, assignment_title):
     else:
         return jsonify('No assignment found'), 404
 
+def to_get_types_by_teacher(client, teacher_username):
+    teacher = client['fyp']['teacher'].find_one({"username": teacher_username})
+    classes = teacher['classes']
+    print(classes)
+    types = []
+
+    for class_name in classes:
+        print(class_name)
+        assignments = client['fyp']['assignment'].find({"class": class_name})
+
+        for assignment in assignments:
+            # Check if 'type' key exists and if the value is not already in the list
+            if 'type' in assignment:
+                for type in assignment['type']:
+                    if type not in types:
+                        print(type)
+                        types.append(type)
+
+    print(types)
+    return jsonify(types)
+
+
+
+def to_get_type_by_assignment(client, assignment_title):
+    assignment = client['fyp']['assignment'].find_one({"title": assignment_title})
+
+    if assignment:
+        print(assignment['type'])
+        return jsonify({
+            'type': assignment['type']
+        })
+    else:
+        return jsonify('No assignment found'), 404
+
 def to_get_title_by_id(client, assignment_id):
     assignment = client['fyp']['assignment'].find_one({"_id": ObjectId(assignment_id)})
     if assignment:
