@@ -65,7 +65,7 @@ def process_with_vision_api(gcs_source_uri):
         ),
         output_config=vision.OutputConfig(
             gcs_destination=vision.GcsDestination(uri=output_uri),
-            batch_size=2
+            batch_size=5
         )
     )
 

@@ -203,10 +203,8 @@ def to_get_title_by_assignment(client, assignment_id):
         return jsonify('No assignment found'), 404
 
 def to_get_homework_text_by_submissionId(client, submission_id):
-    print(submission_id)
     submission = client['fyp']['submittedWork'].find_one({"_id": ObjectId(submission_id)})
     if submission:
-        print(submission['ocrText'])
         return jsonify({
             'homeworkText': submission['ocrText'],"status": "success"
         })
