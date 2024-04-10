@@ -7,7 +7,6 @@ from pymongo import MongoClient
 def to_save_assignment(client):
     data = request.json
     result = client['fyp']['assignment'].insert_one(data)  # Replace 'myCollection' with your collection
-    print(data)
     return jsonify(str(result.inserted_id)), 201
 
 def save_text_to_db(client, student_id, assignment_id, text):
@@ -61,8 +60,6 @@ def to_delete_assignment(client):
     data = request.get_json()
     class_name = data.get('class')
     assignment_title = data.get('assignment_title')
-    print(class_name)
-    print(assignment_title)
     assignment= client['fyp']['assignment'].find_one({'class': class_name, 'title': assignment_title})
 
     # Delete the assignment details
@@ -100,8 +97,6 @@ def to_get_rubrics_by_assignment(client, assignment_title):
     # Assuming each homework title is unique
     assignment = client['fyp']['assignment'].find_one({"title": assignment_title})
     if assignment:
-        print('assignment')
-        print(assignment['rubrics'])
         return jsonify({
             'rubrics': assignment['rubrics']
         })
@@ -151,6 +146,19 @@ def to_get_type_by_assignment(client, assignment_title):
         })
     else:
         return jsonify('No assignment found'), 404
+
+
+def to_get_types_by_class(client, classname):
+    assignments = client['fyp']['assignment'].find({"class": classname})
+    types = []
+
+    for assignment in assignments:
+        if 'type' in assignment:
+            for type in assignment['type']:
+                if type not in types:
+                    types.append(type)
+
+    return jsonify(types)
 
 def to_get_title_by_id(client, assignment_id):
     assignment = client['fyp']['assignment'].find_one({"_id": ObjectId(assignment_id)})
@@ -210,3 +218,48 @@ def to_get_homework_text_by_submissionId(client, submission_id):
         })
     else:
         return jsonify('No submission found'), 404
+
+def to_get_student_submissions(client, student_id):
+    submissions_collection = client['fyp']['submittedWork']
+    assignments_collection = client['fyp']['assignment']
+
+    # Find all submissions for the student
+    submissions = submissions_collection.find({"studentId": str(student_id)})
+
+    # Fetch the title of each assignment for which the student has submitted work
+    submitted_assignment_titles = []
+    for submission in submissions:
+        assignment_id = submission.get("assignmentId")
+        if assignment_id:
+            assignment = assignments_collection.find_one({"_id": ObjectId(assignment_id)})
+            if assignment:
+                submitted_assignment_titles.append(assignment.get("title", "No Title"))
+
+    return jsonify(submitted_assignment_titles)
+
+
+def to_get_students_for_homework(client,assignmentTitle):
+    assgnmentId= client['fyp']['assignment'].find_one({'title':assignmentTitle})['_id']
+    submitted_work_collection = client['fyp']['submittedWork']
+    students_collection = client['fyp']['student']
+
+    # Find all submissions for the given assignment
+    submissions = submitted_work_collection.find({"assignmentId": str(assgnmentId)})
+
+    # Create a list to store student details along with their submission ID
+    student_submissions = []
+
+    # Iterate over the submissions to fetch corresponding student details
+    for submission in submissions:
+        student_id = submission.get('studentId')
+        student = students_collection.find_one({"_id": ObjectId(student_id)})
+        if student:
+            student_submissions.append({
+                "name": student.get('name'),
+                "submissionId": str(submission.get('_id')),  # Convert ObjectId to string
+                "studentId": str(student_id)  # Convert ObjectId to string
+            })
+
+    print (student_submissions)
+
+    return jsonify(student_submissions)

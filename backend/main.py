@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 
+from models.classPerformance import get_average_grades_by_class, to_get_top_performing_students, \
+    to_get_low_performing_students
 from models.login import handle_login
 from models.marking import mark_and_save_marking, get_grades_by_assignment, to_update_grade
 from models.profile import to_update_password
@@ -11,7 +13,8 @@ from models.teacher import get_classes_by_teacher, to_get_teacher_list
 from models.assignment import to_save_assignment, to_delete_assignment, to_update_assignment, \
     to_get_assignment_by_class, to_get_rubrics_by_assignment, \
     to_update_rubrics, to_create_assignment, to_get_description_by_assignment, to_get_class_by_assignment, \
-    to_get_title_by_assignment, to_get_homework_text_by_submissionId, to_get_type_by_assignment, to_get_types_by_teacher
+    to_get_title_by_assignment, to_get_homework_text_by_submissionId, to_get_type_by_assignment, \
+    to_get_types_by_teacher, to_get_types_by_class, to_get_student_submissions, to_get_students_for_homework
 from models.student import get_students_by_class, to_get_all_students_list
 from models.ocr_google_vision import to_upload_and_process_pdf
 
@@ -77,6 +80,10 @@ def get_assignment_by_class(class_name):
 def get_types_by_teacher(username):
     return to_get_types_by_teacher(client, username)
 
+@app.route('/assignment/fetch_types_by_class/<classname>', methods=['GET'])
+def get_types_by_classname(classname):
+    return to_get_types_by_class(client, classname)
+
 @app.route('/assignment/fetch_type_by_title/<assignment_title>', methods=['GET'])
 def get_type_by_assignment(assignment_title):
     return to_get_type_by_assignment(client, assignment_title)
@@ -120,9 +127,30 @@ def update_grade(submissionId):
 def get_homework_text_by_submissionId(submissionId):
     return to_get_homework_text_by_submissionId(client, submissionId)
 
+
+@app.route('/performance/get_all_average_grades_by_class/<classname>', methods=['GET'])
+def average_grades_by_class(classname):
+    return get_average_grades_by_class(client, classname)
+
+@app.route('/performance/get_top_performing_students/<classname>', methods=['GET'])
+def top_performing_students(classname):
+    return to_get_top_performing_students(client, classname)
+
+@app.route('/performance/get_low_performing_students/<classname>', methods=['GET'])
+def low_performing_students(classname):
+    return to_get_low_performing_students(client, classname)
+
+@app.route('/student/<student_id>/submissions', methods=['GET'])
+def get_submissions_by_student(student_id):
+    return to_get_student_submissions(client, student_id)
+
 @app.route('/profile/update_password', methods=['PUT'])
 def update_password():
     return to_update_password(client)
+
+@app.route('/students-for-homework/<assignment_id>', methods=['GET'])
+def get_students_for_homework(assignment_id):
+    return to_get_students_for_homework(client, assignment_id)
 
 @app.route('/ping', methods=['GET'])
 def ping():

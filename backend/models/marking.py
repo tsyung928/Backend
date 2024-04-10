@@ -34,12 +34,12 @@ def mark_and_save_marking(client):
 
         # Parsing each line to find the score and explanation
         for line in lines:
-            if line.startswith("1. Score:"):
+            if line.startswith("Score:"):
                 # Extracting the score
-                extracted_score = line.replace("1. Score:","").strip()
-            elif line.startswith("2. Explanation:"):
+                extracted_score = line.replace("Score:","").strip()
+            elif line.startswith("Explanation:"):
                 # Extracting the explanation
-                extracted_explanation = line.replace("2. Explanation:","").strip()
+                extracted_explanation = line.replace("Explanation:","").strip()
 
         client['fyp']['submittedWork'].update_one(
             {'studentId': str(student_id), 'assignmentId': str(assignment_id)},
