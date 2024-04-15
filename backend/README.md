@@ -1,0 +1,4 @@
+This project introduces an Automated Homework Marking Web Application utilising the OpenAI GPT model, designed to streamline the marking process for teachers. It integrates Optical Character Recognition (OCR) with the GPT model, enabling efficient evaluation of handwritten assignments. This application aims to reduce teachers' workload and provide constructive feedback on student’s work. 
+Please refer to the README.md file for more information on the project.
+
+Please enter your MONGODB_URI, OPENAI_API_KEY, GOOGLE_APPLICATION_CREDENTIALS and BUCKET_NAME in the .env file before running the application.
