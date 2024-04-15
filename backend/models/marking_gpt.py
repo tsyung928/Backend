@@ -73,7 +73,7 @@ def gpt_mark(student_work, rubrics, description):
         messages=[
             {"role": "system",
              "content": "You are a English Teacher, skilled in marking English essays. You will be given a piece of student work, score the work based on the rubric provided and explain the reasoning behind the score.  You should give out marks in numerical numbers only according to the rubrics provided, and give score explanations. You should not provided another other details except the marks and score explanations"},
-            {"role": "user", "content": zero_shot(student_work, rubrics, description)}
+            {"role": "user", "content": few_shot(examples, student_work, rubrics, description)}
         ]
     )
     print(completion.choices[0].message.content)

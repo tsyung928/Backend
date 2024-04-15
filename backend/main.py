@@ -4,10 +4,12 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 
+from models.admin import add_teacher, delete_teacher, update_teacher, add_student, delete_student, update_student
 from models.classPerformance import get_average_grades_by_class, to_get_top_performing_students, \
     to_get_low_performing_students
 from models.login import handle_login
-from models.marking import mark_and_save_marking, get_grades_by_assignment, to_update_grade
+from models.marking import mark_and_save_marking, get_grades_by_assignment, to_update_grade, \
+    get_grades_by_one_submission
 from models.profile import to_update_password
 from models.teacher import get_classes_by_teacher, to_get_teacher_list
 from models.assignment import to_save_assignment, to_delete_assignment, to_update_assignment, \
@@ -109,6 +111,11 @@ def start_marking():
 def grades_after_marking(assignmentId):
     return get_grades_by_assignment(client, assignmentId)
 
+@app.route('/marking/grades_per_submission/<submissionId>', methods=['GET'])
+def grades_per_submission(submissionId):
+    return get_grades_by_one_submission(client, submissionId)
+
+
 @app.route('/assignment/get_class_by_assignmentid/<assignmentId>', methods=['GET'])
 def get_class_by_assignment(assignmentId):
     return to_get_class_by_assignment(client, assignmentId)
@@ -151,6 +158,34 @@ def update_password():
 @app.route('/students-for-homework/<assignment_id>', methods=['GET'])
 def get_students_for_homework(assignment_id):
     return to_get_students_for_homework(client, assignment_id)
+
+@app.route('/add-teacher', methods=['POST'])
+def to_add_teacher():
+    return add_teacher(client)
+
+@app.route('/delete-teacher/<teacherId>', methods=['DELETE'])
+def to_delete_teacher(teacherId):
+    return delete_teacher(client, teacherId)
+
+@app.route('/update-teacher/<teacherId>', methods=['PUT'])
+def to_update_teacher(teacherId):
+    return update_teacher(client, teacherId)
+
+
+@app.route('/add-student', methods=['POST'])
+def to_add_student():
+    return add_student(client)
+
+@app.route('/delete-student/<studentId>', methods=['DELETE'])
+def to_delete_student(studentId):
+    return delete_student(client, studentId)
+
+
+@app.route('/update-student/<studentId>', methods=['PUT'])
+def to_update_student(studentId):
+    return update_student(client, studentId)
+
+
 
 @app.route('/ping', methods=['GET'])
 def ping():

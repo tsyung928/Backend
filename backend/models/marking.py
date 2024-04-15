@@ -21,11 +21,10 @@ def mark_and_save_marking(client):
     for student in students:
         student_id = student['_id']
         student_work= client['fyp']['submittedWork'].find_one({'studentId': str(student_id), 'assignmentId': str(assignment_id)})['ocrText']
+
+
         markings=gpt_mark(student_work, rubrics, description )
-        #print (client['fyp']['student'].find_one({'_id': ObjectId(student_id)})['name'])
 
-
-        # Splitting the response into lines for easier processing
         lines = markings.strip().split('\n')
 
         # Initialize variables to store the extracted score and explanation
@@ -40,6 +39,7 @@ def mark_and_save_marking(client):
             elif line.startswith("Explanation:"):
                 # Extracting the explanation
                 extracted_explanation = line.replace("Explanation:","").strip()
+
 
         client['fyp']['submittedWork'].update_one(
             {'studentId': str(student_id), 'assignmentId': str(assignment_id)},
@@ -76,6 +76,21 @@ def get_grades_by_assignment(client, assignment_id):
     # Return the list of scores and explanations as JSON
     return jsonify(grades_list)
 
+def get_grades_by_one_submission(client, submission_id):
+    # Fetching grades data for the given assignment
+    submission = client['fyp']['submittedWork'].find_one({'_id': ObjectId(submission_id)})
+    # Creating a list of scores and explanations
+    grade_data = {
+        'submissionId': str(submission['_id']),  # Convert ObjectId to string
+        'studentId': str(submission['studentId']),
+        'studentName': client['fyp']['student'].find_one({'_id': ObjectId(submission['studentId'])})['name'],
+        'studentNumber': client['fyp']['student'].find_one({'_id': ObjectId(submission['studentId'])})['number'],
+        'score': submission['marking'].get('score'),
+        'explanation': submission['marking'].get('explanation')
+        # Providing default if not found
+    }
+    # Return the list of scores and explanations as JSON
+    return jsonify(grade_data)
 
 def to_update_grade(client, submission_id):
     # Get the data from the request's body

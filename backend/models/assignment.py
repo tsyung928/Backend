@@ -257,7 +257,8 @@ def to_get_students_for_homework(client,assignmentTitle):
             student_submissions.append({
                 "name": student.get('name'),
                 "submissionId": str(submission.get('_id')),  # Convert ObjectId to string
-                "studentId": str(student_id)  # Convert ObjectId to string
+                "studentId": str(student_id),  # Convert ObjectId to string
+                "number": student.get('number')
             })
 
     print (student_submissions)
